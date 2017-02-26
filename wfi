@@ -1,0 +1,66 @@
+#! /bin/bash
+
+#Interactive WPA wifi set up, by Adam Boulianne.
+
+###############
+# Version 0.2 #
+###############
+
+clear
+echo "Please enter the WPA ESSID"
+read essid #User input his local wifi name.
+echo "Thank you, now your password"
+password=''
+while IFS= read -r -s -n1 char; do
+  [[ -z $char ]] && { printf '\n'; break; } # ENTER pressed; output \n and break.
+  if [[ $char == $'\x7f' ]]; then # backspace was pressed
+      # Remove last char from output variable.
+      [[ -n $password ]] && password=${password%?}
+      # Erase '*' to the left.
+      printf '\b \b' 
+  else
+    # Add typed char to output variable.
+    password+=$char
+    # Print '*' in its stead.
+    printf '*'
+  fi
+done
+
+clear
+echo "Connecting..."
+{
+ip link set wls1 up #sets device up.
+wpa_supplicant -D n180211,wext -i wls1 -c <(wpa_passphrase "$essid" "$password") -B #Connects to router using preset variables.
+dhcpcd wls1 #Optains IP address.
+} &> /dev/null
+
+echo
+clear 
+echo "You should be good to go now!"
+
+###############
+# Version 0.1 #
+######################################
+#Interactive wifi set up.	     #	
+#                                    #
+#clear                               #
+#echo "Please enter the WPA ESSID"   #
+#read essid #User input his local wifi name.
+#echo "Thank you, now your password" #
+#read passw #User input wifi password.
+#                                    #
+#clear                               #
+#echo "Connecting..."                # 
+#{                                   #
+#ip link set wls1 up #sets device up.#
+#wpa_supplicant -D n180211,wext -i wls1 -c <(wpa_passphrase "$essid" "$passw") -B #Connects to #router using preset variables.      # 
+#dhcpcd wls1 #Optains IP address.    #
+#} &> /dev/null                      #
+#                                    #
+#echo                                #
+#clear                               #
+#echo "You should be good to go now!"#
+######################################
+
+
+
